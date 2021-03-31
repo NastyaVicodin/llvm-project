@@ -578,6 +578,9 @@ template <> struct MappingTraits<FormatStyle> {
         Style.BreakInheritanceList == FormatStyle::BILS_BeforeColon)
       Style.BreakInheritanceList = FormatStyle::BILS_BeforeComma;
 
+    IO.mapOptional("BreakBeforeInlineASMColon",
+                   Style.BreakBeforeInlineASMColon);
+
     IO.mapOptional("BreakBeforeTernaryOperators",
                    Style.BreakBeforeTernaryOperators);
 
@@ -966,6 +969,7 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
   LLVMStyle.BinPackParameters = true;
   LLVMStyle.BreakBeforeBinaryOperators = FormatStyle::BOS_None;
   LLVMStyle.BreakBeforeConceptDeclarations = true;
+  LLVMStyle.BreakBeforeInlineASMColon = false;
   LLVMStyle.BreakBeforeTernaryOperators = true;
   LLVMStyle.BreakBeforeBraces = FormatStyle::BS_Attach;
   LLVMStyle.BraceWrapping = {/*AfterCaseLabel=*/false,

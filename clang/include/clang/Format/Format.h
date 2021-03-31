@@ -1722,6 +1722,18 @@ struct FormatStyle {
   /// \endcode
   bool BreakBeforeConceptDeclarations;
 
+  /// If ``true``, colons in ASM parameters will be placed after line breaks.
+  /// \code
+  ///    true:
+  ///    asm volatile("string",
+  ///                 :
+  ///                 : val);
+  ///
+  ///    false:
+  ///    asm volatile("string", : : val);
+  /// \endcode
+  bool BreakBeforeInlineASMColon;
+
   /// If ``true``, ternary operators will be placed after line breaks.
   /// \code
   ///    true:
@@ -3296,6 +3308,7 @@ struct FormatStyle {
            BreakBeforeBinaryOperators == R.BreakBeforeBinaryOperators &&
            BreakBeforeBraces == R.BreakBeforeBraces &&
            BreakBeforeConceptDeclarations == R.BreakBeforeConceptDeclarations &&
+           BreakBeforeInlineASMColon == R.BreakBeforeInlineASMColon &&
            BreakBeforeTernaryOperators == R.BreakBeforeTernaryOperators &&
            BreakConstructorInitializers == R.BreakConstructorInitializers &&
            CompactNamespaces == R.CompactNamespaces &&

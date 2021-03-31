@@ -3513,6 +3513,9 @@ bool TokenAnnotator::mustBreakBefore(const AnnotatedLine &Line,
   const FormatToken &Left = *Right.Previous;
   if (Right.NewlinesBefore > 1 && Style.MaxEmptyLinesToKeep > 0)
     return true;
+  if (Line.startsWith(tok::kw_asm) && Right.is(TT_InlineASMColon) &&
+      Style.BreakBeforeInlineASMColon)
+    return true;
 
   if (Style.isCSharp()) {
     if (Right.is(TT_CSharpNamedArgumentColon) ||

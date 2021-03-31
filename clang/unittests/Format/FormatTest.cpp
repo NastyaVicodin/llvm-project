@@ -3000,12 +3000,16 @@ TEST_F(FormatTest, IndentExternBlockStyle) {
 TEST_F(FormatTest, FormatsInlineASM) {
   verifyFormat("asm(\"xyz\" : \"=a\"(a), \"=d\"(b) : \"a\"(data));");
   verifyFormat("asm(\"nop\" ::: \"memory\");");
+
+  FormatStyle Style = getLLVMStyle();
+  Style.BreakBeforeInlineASMColon = true;
   verifyFormat(
       "asm(\"movq\\t%%rbx, %%rsi\\n\\t\"\n"
       "    \"cpuid\\n\\t\"\n"
       "    \"xchgq\\t%%rbx, %%rsi\\n\\t\"\n"
       "    : \"=a\"(*rEAX), \"=S\"(*rEBX), \"=c\"(*rECX), \"=d\"(*rEDX)\n"
-      "    : \"a\"(value));");
+      "    : \"a\"(value));",
+      Style);
   EXPECT_EQ(
       "void NS_InvokeByIndex(void *that, unsigned int methodIndex) {\n"
       "  __asm {\n"
@@ -5451,6 +5455,43 @@ TEST_F(FormatTest, AllowAllArgumentsOnNextLineDontAlign) {
                       "void functionDecl(\n"
                       "    int A, int B, int C);"),
             format(Input, Style));
+}
+
+TEST_F(FormatTest, BreakBeforeInlineASMColon) {
+  FormatStyle Style = getLLVMStyle();
+  Style.BreakStringLiterals = false;
+  Style.BreakBeforeInlineASMColon = false;
+  /* Test the behaviour with long lines */
+  Style.ColumnLimit = 40;
+  verifyFormat("asm volatile(\"loooooooooooooooooooong\",\n"
+               "             : : val);",
+               Style);
+  verifyFormat("asm volatile(\"loooooooooooooooooooong\",\n"
+               "             : val1 : val2);",
+               Style);
+  Style.ColumnLimit = 80;
+  verifyFormat("asm volatile(\"string\", : : val);", Style);
+  verifyFormat("asm volatile(\"string\", : val1 : val2);", Style);
+
+  Style.BreakBeforeInlineASMColon = true;
+  verifyFormat("asm volatile(\"string\",\n"
+               "             :\n"
+               "             : val);",
+               Style);
+  verifyFormat("asm volatile(\"string\",\n"
+               "             : val1\n"
+               "             : val2);",
+               Style);
+  /* Test the behaviour with long lines */
+  Style.ColumnLimit = 40;
+  verifyFormat("asm volatile(\"loooooooooooooooooooong\",\n"
+               "             :\n"
+               "             : val);",
+               Style);
+  verifyFormat("asm volatile(\"loooooooooooooooooooong\",\n"
+               "             : val1\n"
+               "             : val2);",
+               Style);
 }
 
 TEST_F(FormatTest, BreakConstructorInitializersAfterColon) {
@@ -19586,15 +19627,18 @@ asm volatile("mrs %x[result], FPCR" : [result] "=r"(result));
   // A list of several ASM symbolic names.
   verifyFormat(R"(asm("mov %[e], %[d]" : [d] "=rm"(d), [e] "rm"(*e));)");
 
+  // ASM symbolic names in inline ASM with no outputs.
+  verifyFormat(R"(asm("mov %[e], %[d]" : : [d] "=rm"(d), [e] "rm"(*e));)");
+
+  format::FormatStyle Style = format::getLLVMStyle();
+  Style.BreakBeforeInlineASMColon = true;
   // ASM symbolic names in inline ASM with inputs and outputs.
   verifyFormat(R"(//
 asm("cmoveq %1, %2, %[result]"
     : [result] "=r"(result)
     : "r"(test), "r"(new), "[result]"(old));
-)");
-
-  // ASM symbolic names in inline ASM with no outputs.
-  verifyFormat(R"(asm("mov %[e], %[d]" : : [d] "=rm"(d), [e] "rm"(*e));)");
+)",
+Style);
 }
 
 TEST_F(FormatTest, GuessedLanguageWithInlineAsmClobbers) {

@@ -1899,7 +1899,18 @@ the configuration (without a prefix: ``Auto``).
   * ``BS_Custom`` (in configuration: ``Custom``)
     Configure each individual brace in `BraceWrapping`.
 
+**BreakBeforeInlineASMColon** (``bool``)
+  If ``true``, colons in ASM parameters will be placed after line breaks.
 
+  .. code-block:: c
+
+     true:
+      asm volatile("string",
+                   :
+                   : val);
+
+     false:
+      asm volatile("string", : : val);
 
 **BreakBeforeConceptDeclarations** (``bool``)
   If ``true``, concept will be placed on a new line.
