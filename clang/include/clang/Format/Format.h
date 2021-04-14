@@ -2103,6 +2103,20 @@ struct FormatStyle {
   /// clang-format aware of such cases.
   ///
   /// For example: Q_UNUSED
+  ///
+  /// Cases in switch block can be defined as StatementMacros. The behavior is
+  /// the same as 'case' in switch block.
+  ///
+  /// \code
+  ///   switch (x) {
+  ///   FOO:
+  ///     break;
+  ///   case 0:
+  ///     break;
+  ///   BAR(var) :
+  ///     break;
+  ///   }
+  /// \endcode
   std::vector<std::string> StatementMacros;
 
   /// A vector of macros which are used to open namespace blocks.

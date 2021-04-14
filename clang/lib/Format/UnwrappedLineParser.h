@@ -84,10 +84,11 @@ public:
 private:
   void reset();
   void parseFile();
-  void parseLevel(bool HasOpeningBrace);
+  void parseLevel(bool HasOpeningBrace, bool InSwitchBlock = false);
   void parseBlock(bool MustBeDeclaration, unsigned AddLevels = 1u,
                   bool MunchSemi = true,
-                  bool UnindentWhitesmithsBraces = false);
+                  bool UnindentWhitesmithsBraces = false,
+                  bool InSwitchBlock = false);
   void parseChildBlock();
   void parsePPDirective();
   void parsePPDefine();
@@ -97,7 +98,7 @@ private:
   void parsePPEndIf();
   void parsePPUnknown();
   void readTokenWithJavaScriptASI();
-  void parseStructuralElement();
+  void parseStructuralElement(bool InLevelParsing = false);
   bool tryToParseBracedList();
   bool parseBracedList(bool ContinueOnSemicolons = false, bool IsEnum = false,
                        tok::TokenKind ClosingBraceKind = tok::r_brace);
@@ -131,7 +132,7 @@ private:
   void parseObjCInterfaceOrImplementation();
   bool parseObjCProtocol();
   void parseJavaScriptEs6ImportExport();
-  void parseStatementMacro();
+  void parseStatementMacro(bool InLevelParsing = false);
   void parseCSharpAttribute();
   // Parse a C# generic type constraint: `where T : IComparable<T>`.
   // See:

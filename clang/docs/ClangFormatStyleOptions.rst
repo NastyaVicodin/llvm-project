@@ -3597,6 +3597,21 @@ the configuration (without a prefix: ``Auto``).
 
   For example: Q_UNUSED
 
+  Cases in switch block can be defined as StatementMacros. The behavior is
+  the same as 'case' in switch block.
+
+
+  .. code-block:: c++
+
+    switch (x) {
+    FOO:
+      break;
+    case 0:
+      break;
+    BAR(var) :
+      break;
+    }
+
 **TabWidth** (``unsigned``)
   The number of columns used for tab stops.
 

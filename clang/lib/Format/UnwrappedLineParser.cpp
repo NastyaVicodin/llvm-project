@@ -365,7 +365,7 @@ void UnwrappedLineParser::parseCSharpAttribute() {
   } while (!eof());
 }
 
-void UnwrappedLineParser::parseLevel(bool HasOpeningBrace) {
+void UnwrappedLineParser::parseLevel(bool HasOpeningBrace, bool InSwitchBlock) {
   bool SwitchLabelEncountered = false;
   do {
     tok::TokenKind kind = FormatTok->Tok.getKind();
@@ -374,7 +374,8 @@ void UnwrappedLineParser::parseLevel(bool HasOpeningBrace) {
     } else if (FormatTok->getType() == TT_MacroBlockEnd) {
       kind = tok::r_brace;
     }
-
+    if (FormatTok->is(TT_StatementMacro) && InSwitchBlock)
+      parseStructuralElement(/*InLevelParsing=*/true);
     switch (kind) {
     case tok::comment:
       nextToken();
@@ -581,7 +582,8 @@ size_t UnwrappedLineParser::computePPHash() const {
 
 void UnwrappedLineParser::parseBlock(bool MustBeDeclaration, unsigned AddLevels,
                                      bool MunchSemi,
-                                     bool UnindentWhitesmithsBraces) {
+                                     bool UnindentWhitesmithsBraces,
+                                     bool InSwitchBlock) {
   assert(FormatTok->isOneOf(tok::l_brace, TT_MacroBlockBegin) &&
          "'{' or macro block token expected");
   const bool MacroBlock = FormatTok->is(TT_MacroBlockBegin);
@@ -618,7 +620,7 @@ void UnwrappedLineParser::parseBlock(bool MustBeDeclaration, unsigned AddLevels,
                                           MustBeDeclaration);
   if (AddLevels > 0u && Style.BreakBeforeBraces != FormatStyle::BS_Whitesmiths)
     Line->Level += AddLevels;
-  parseLevel(/*HasOpeningBrace=*/true);
+  parseLevel(/*HasOpeningBrace=*/true, InSwitchBlock);
 
   if (eof())
     return;
@@ -1039,7 +1041,7 @@ void UnwrappedLineParser::readTokenWithJavaScriptASI() {
     return addUnwrappedLine();
 }
 
-void UnwrappedLineParser::parseStructuralElement() {
+void UnwrappedLineParser::parseStructuralElement(bool InLevelParsing) {
   assert(!FormatTok->is(tok::l_brace));
   if (Style.Language == FormatStyle::LK_TableGen &&
       FormatTok->is(tok::pp_include)) {
@@ -1204,7 +1206,7 @@ void UnwrappedLineParser::parseStructuralElement() {
       }
     }
     if (Style.isCpp() && FormatTok->is(TT_StatementMacro)) {
-      parseStatementMacro();
+      parseStatementMacro(InLevelParsing);
       return;
     }
     if (Style.isCpp() && FormatTok->is(TT_NamespaceMacro)) {
@@ -2317,7 +2319,9 @@ void UnwrappedLineParser::parseSwitch() {
     parseParens();
   if (FormatTok->Tok.is(tok::l_brace)) {
     CompoundStatementIndenter Indenter(this, Style, Line->Level);
-    parseBlock(/*MustBeDeclaration=*/false);
+    parseBlock(/*MustBeDeclaration=*/false, /*AddLevels=*/1u,
+               /*MunchSemi=*/true, /*UnindentWhitesmithsBraces=*/false,
+               /*InSwitchBlock=*/true);
     addUnwrappedLine();
   } else {
     addUnwrappedLine();
@@ -2929,10 +2933,12 @@ void UnwrappedLineParser::parseJavaScriptEs6ImportExport() {
   }
 }
 
-void UnwrappedLineParser::parseStatementMacro() {
+void UnwrappedLineParser::parseStatementMacro(bool InLevelParsing) {
   nextToken();
   if (FormatTok->is(tok::l_paren))
     parseParens();
+  if (InLevelParsing && FormatTok->is(tok::colon))
+    parseLabel();
   if (FormatTok->is(tok::semi))
     nextToken();
   addUnwrappedLine();

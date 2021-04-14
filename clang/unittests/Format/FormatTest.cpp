@@ -3830,6 +3830,56 @@ TEST_F(FormatTest, LayoutMacroDefinitionsStatementsSpanningBlocks) {
                getLLVMStyleWithColumns(11));
 }
 
+TEST_F(FormatTest, StatementMacroInSwitchBlock) {
+  FormatStyle Style = getLLVMStyle();
+  Style.StatementMacros.push_back("FOO");
+  Style.StatementMacros.push_back("BAR");
+  verifyFormat("switch (x) {\n"
+               "FOO:\n"
+               "  break;\n"
+               "case 0:\n"
+               "  break;\n"
+               "FOO(var) :\n"
+               "  break;\n"
+               "case 1:\n"
+               "  break;\n"
+               "}",
+               Style);
+  // Check the class cases behavior
+  verifyFormat("switch (x) {\n"
+               "  class S1 {};\n"
+               "  class S2 : S1 {};\n"
+               "  CLASS(x) : break;\n"
+               "  CLASS(x) : S1{};\n"
+               "case 0:\n"
+               "  class S3 {};\n"
+               "  class S4 : public S3 {};\n"
+               "}",
+               Style);
+  verifyFormat("class FOO(x) : public x {\n"
+               "public:\n"
+               "  int x;\n"
+               "  FOO(int y) : x(y) {}\n"
+               "};",
+               Style);
+  // Check the TernaryOperators behaviour
+  Style.BreakBeforeTernaryOperators = false;
+  verifyFormat("return x > y ? FOO(x) : BAR(y);", Style);
+  // This option removes the space before the StatementMacro colon
+  Style.SpaceBeforeCtorInitializerColon = false;
+  verifyFormat("switch (x) {\n"
+               "FOO:\n"
+               "  break;\n"
+               "case 0:\n"
+               "  break;\n"
+               "FOO(var):\n"
+               "  break;\n"
+               "case 1:\n"
+               "  break;\n"
+               "}",
+               Style);
+}
+
 TEST_F(FormatTest, IndentPreprocessorDirectives) {
   FormatStyle Style = getLLVMStyle();
   Style.IndentPPDirectives = FormatStyle::PPDIS_None;
