@@ -62,7 +62,9 @@ static void reportUndefined(Symbol *sym) {
                      << "ignoring undefined symbol: " + toString(*sym) + "\n");
           f->stubFunction = symtab->createUndefinedStub(*f->getSignature());
           f->stubFunction->markLive();
-          f->setTableIndex(0);
+          // Mark the function itself as a stub which prevents it from being
+          // assigned a table entry.
+          f->isStub = true;
         }
       }
       break;
@@ -102,6 +104,7 @@ void scanRelocations(InputChunk *chunk) {
     case R_WASM_TABLE_INDEX_SLEB:
     case R_WASM_TABLE_INDEX_SLEB64:
     case R_WASM_TABLE_INDEX_REL_SLEB:
+    case R_WASM_TABLE_INDEX_REL_SLEB64:
       if (requiresGOTAccess(sym))
         break;
       out.elemSec->addEntry(cast<FunctionSymbol>(sym));
@@ -112,12 +115,17 @@ void scanRelocations(InputChunk *chunk) {
         addGOTEntry(sym);
       break;
     case R_WASM_MEMORY_ADDR_TLS_SLEB:
-      if (auto *D = dyn_cast<DefinedData>(sym)) {
-        if (D->segment->outputSeg->name != ".tdata") {
-          error(toString(file) + ": relocation " +
-                relocTypeToString(reloc.Type) + " cannot be used against `" +
-                toString(*sym) +
-                "` in non-TLS section: " + D->segment->outputSeg->name);
+      // In single-threaded builds TLS is lowered away and TLS data can be
+      // merged with normal data and allowing TLS relocation in non-TLS
+      // segments.
+      if (config->sharedMemory) {
+        if (auto *D = dyn_cast<DefinedData>(sym)) {
+          if (!D->segment->outputSeg->isTLS()) {
+            error(toString(file) + ": relocation " +
+                  relocTypeToString(reloc.Type) + " cannot be used against `" +
+                  toString(*sym) +
+                  "` in non-TLS section: " + D->segment->outputSeg->name);
+          }
         }
       }
       break;
@@ -148,10 +156,9 @@ void scanRelocations(InputChunk *chunk) {
           addGOTEntry(sym);
         break;
       }
-    } else {
+    } else if (sym->isUndefined() && !config->relocatable && !sym->isWeak()) {
       // Report undefined symbols
-      if (sym->isUndefined() && !config->relocatable && !sym->isWeak())
-        reportUndefined(sym);
+      reportUndefined(sym);
     }
   }
 }

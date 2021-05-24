@@ -60,6 +60,10 @@ buildCompilerInvocation(const ParseInputs &Inputs, clang::DiagnosticConsumer &D,
   CI->getFrontendOpts().DisableFree = false;
   CI->getLangOpts()->CommentOpts.ParseAllComments = true;
   CI->getLangOpts()->RetainCommentsFromSystemHeaders = true;
+  // Disable "clang -verify" diagnostics, they are rarely useful in clangd, and
+  // our compiler invocation set-up doesn't seem to work with it (leading
+  // assertions in VerifyDiagnosticConsumer).
+  CI->getDiagnosticOpts().VerifyDiagnostics = false;
 
   // Disable any dependency outputting, we don't want to generate files or write
   // to stdout/stderr.
@@ -81,10 +85,10 @@ buildCompilerInvocation(const ParseInputs &Inputs, clang::DiagnosticConsumer &D,
   // Don't crash on `#pragma clang __debug parser_crash`
   CI->getPreprocessorOpts().DisablePragmaDebugCrash = true;
 
-  if (Inputs.Opts.BuildRecoveryAST)
-    CI->getLangOpts()->RecoveryAST = true;
-  if (Inputs.Opts.PreserveRecoveryASTType)
-    CI->getLangOpts()->RecoveryASTType = true;
+  // Always default to raw container format as clangd doesn't registry any other
+  // and clang dies when faced with unknown formats.
+  CI->getHeaderSearchOpts().ModuleFormat =
+      PCHContainerOperations().getRawReader().getFormat().str();
 
   return CI;
 }
@@ -119,9 +123,7 @@ prepareCompilerInstance(std::unique_ptr<clang::CompilerInvocation> CI,
     VFS = VFSWithRemapping;
   Clang->createFileManager(VFS);
 
-  Clang->setTarget(TargetInfo::CreateTargetInfo(
-      Clang->getDiagnostics(), Clang->getInvocation().TargetOpts));
-  if (!Clang->hasTarget())
+  if (!Clang->createTarget())
     return nullptr;
 
   // RemappedFileBuffers will handle the lifetime of the Buffer pointer,

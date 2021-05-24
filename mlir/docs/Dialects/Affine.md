@@ -13,7 +13,7 @@ core concepts that are used throughout the document.
 ### Dimensions and Symbols
 
 Dimensions and symbols are the two kinds of identifiers that can appear in the
-polyhedral structures, and are always of [`index`](../LangRef.md#index-type)
+polyhedral structures, and are always of [`index`](Builtin.md#indextype)
 type. Dimensions are declared in parentheses and symbols are declared in square
 brackets.
 
@@ -113,7 +113,7 @@ less than or equal to that result. `mod` is the modulo operation: since its
 second argument is always positive, its results are always positive in our
 usage. The `integer-literal` operand for ceildiv, floordiv, and mod is always
 expected to be positive. `bare-id` is an identifier which must have type
-[index](../LangRef.md#index-type). The precedence of operations in an affine
+[index](Builtin.md#indextype). The precedence of operations in an affine
 expression are ordered from highest to lowest in the order: (1)
 parenthesization, (2) negation, (3) modulo, multiplication, floordiv, and
 ceildiv, and (4) addition and subtraction. All of these operators associate from
@@ -124,19 +124,19 @@ one-dimensional affine expressions, with the entire list enclosed in
 parentheses.
 
 **Context:** An affine function, informally, is a linear function plus a
-constant. More formally, a function f defined on a vector $$\vec{v} \in
-\mathbb{Z}^n$$ is a multidimensional affine function of $$\vec{v}$$ if
-$$f(\vec{v})$$ can be expressed in the form $$M \vec{v} + \vec{c}$$ where $$M$$
-is a constant matrix from $$\mathbb{Z}^{m \times n}$$ and $$\vec{c}$$ is a
-constant vector from $$\mathbb{Z}$$. $$m$$ is the dimensionality of such an
+constant. More formally, a function f defined on a vector $\vec{v} \in
+\mathbb{Z}^n$ is a multidimensional affine function of $\vec{v}$ if
+$f(\vec{v})$ can be expressed in the form $M \vec{v} + \vec{c}$ where $M$
+is a constant matrix from $\mathbb{Z}^{m \times n}$ and $\vec{c}$ is a
+constant vector from $\mathbb{Z}$. $m$ is the dimensionality of such an
 affine function. MLIR further extends the definition of an affine function to
 allow 'floordiv', 'ceildiv', and 'mod' with respect to positive integer
 constants. Such extensions to affine functions have often been referred to as
 quasi-affine functions by the polyhedral compiler community. MLIR uses the term
 'affine map' to refer to these multidimensional quasi-affine functions. As
-examples, $$(i+j+1, j)$$, $$(i \mod 2, j+i)$$, $$(j, i/4, i \mod 4)$$, $$(2i+1,
-j)$$ are two-dimensional affine functions of $$(i, j)$$, but $$(i \cdot j,
-i^2)$$, $$(i \mod j, i/j)$$ are not affine functions of $$(i, j)$$.
+examples, $(i+j+1, j)$, $(i \mod 2, j+i)$, $(j, i/4, i \mod 4)$, $(2i+1,
+j)$ are two-dimensional affine functions of $(i, j)$, but $(i \cdot j,
+i^2)$, $(i \mod j, i/j)$ are not affine functions of $(i, j)$.
 
 ### Affine Maps
 

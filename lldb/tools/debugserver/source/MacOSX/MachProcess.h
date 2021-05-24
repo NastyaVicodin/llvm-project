@@ -92,10 +92,10 @@ public:
                                            char const *envp[],
                                            MachProcess *process, DNBError &err);
   static pid_t PosixSpawnChildForPTraceDebugging(
-      const char *path, cpu_type_t cpu_type, char const *argv[],
-      char const *envp[], const char *working_directory, const char *stdin_path,
-      const char *stdout_path, const char *stderr_path, bool no_stdio,
-      MachProcess *process, int disable_aslr, DNBError &err);
+      const char *path, cpu_type_t cpu_type, cpu_subtype_t cpu_subtype,
+      char const *argv[], char const *envp[], const char *working_directory,
+      const char *stdin_path, const char *stdout_path, const char *stderr_path,
+      bool no_stdio, MachProcess *process, int disable_aslr, DNBError &err);
   nub_addr_t GetDYLDAllImageInfosAddress();
   static const void *PrepareForAttach(const char *path,
                                       nub_launch_flavor_t launch_flavor,
@@ -252,6 +252,7 @@ public:
                                      struct mach_o_information &inf);
   JSONGenerator::ObjectSP FormatDynamicLibrariesIntoJSON(
       const std::vector<struct binary_image_information> &image_infos);
+  uint32_t GetPlatform();
   /// Get the runtime platform from DYLD via SPI.
   uint32_t GetProcessPlatformViaDYLDSPI();
   /// Use the dyld SPI present in macOS 10.12, iOS 10, tvOS 10,
@@ -343,6 +344,9 @@ public:
 
   bool ProcessUsingFrontBoard();
 
+  // Size of addresses in the inferior process (4 or 8).
+  int GetInferiorAddrSize(pid_t pid);
+
   Genealogy::ThreadActivitySP GetGenealogyInfoForThread(nub_thread_t tid,
                                                         bool &timed_out);
 
@@ -375,6 +379,7 @@ private:
 
   pid_t m_pid;           // Process ID of child process
   cpu_type_t m_cpu_type; // The CPU type of this process
+  uint32_t m_platform;   // The platform of this process
   int m_child_stdin;
   int m_child_stdout;
   int m_child_stderr;
