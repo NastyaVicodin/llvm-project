@@ -1339,6 +1339,23 @@ the configuration (without a prefix: ``Auto``).
         bar();
       });
 
+  * ``bool BeforeStructInitialization`` Wrap before struct initialization.
+
+    .. code-block:: c++
+
+      true:
+      struct new_struct struct_name =
+          {
+            a = 1,
+            b = 2,
+          };
+
+      false:
+      struct new_struct struct_name = {
+        a = 1,
+        b = 2,
+      };
+
   * ``bool BeforeWhile`` Wrap before ``while``.
 
     .. code-block:: c++

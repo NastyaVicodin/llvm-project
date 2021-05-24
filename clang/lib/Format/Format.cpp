@@ -737,6 +737,8 @@ template <> struct MappingTraits<FormatStyle::BraceWrappingFlags> {
     IO.mapOptional("BeforeCatch", Wrapping.BeforeCatch);
     IO.mapOptional("BeforeElse", Wrapping.BeforeElse);
     IO.mapOptional("BeforeLambdaBody", Wrapping.BeforeLambdaBody);
+    IO.mapOptional("BeforeStructInitialization",
+                   Wrapping.BeforeStructInitialization);
     IO.mapOptional("BeforeWhile", Wrapping.BeforeWhile);
     IO.mapOptional("IndentBraces", Wrapping.IndentBraces);
     IO.mapOptional("SplitEmptyFunction", Wrapping.SplitEmptyFunction);
@@ -848,6 +850,7 @@ static FormatStyle expandPresets(const FormatStyle &Style) {
                             /*BeforeCatch=*/false,
                             /*BeforeElse=*/false,
                             /*BeforeLambdaBody=*/false,
+                            /*BeforeStructInitialization=*/false,
                             /*BeforeWhile=*/false,
                             /*IndentBraces=*/false,
                             /*SplitEmptyFunction=*/true,
@@ -921,6 +924,7 @@ static FormatStyle expandPresets(const FormatStyle &Style) {
         /*BeforeCatch=*/true,
         /*BeforeElse=*/true,
         /*BeforeLambdaBody=*/false,
+        /*BeforeStructInitialization=*/false,
         /*BeforeWhile=*/true,
         /*IndentBraces=*/true,
         /*SplitEmptyFunction=*/true,
@@ -985,6 +989,7 @@ FormatStyle getLLVMStyle(FormatStyle::LanguageKind Language) {
                              /*BeforeCatch=*/false,
                              /*BeforeElse=*/false,
                              /*BeforeLambdaBody=*/false,
+                             /*BeforeStructInitialization=*/false,
                              /*BeforeWhile=*/false,
                              /*IndentBraces=*/false,
                              /*SplitEmptyFunction=*/true,

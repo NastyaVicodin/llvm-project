@@ -5494,6 +5494,106 @@ TEST_F(FormatTest, BreakBeforeInlineASMColon) {
                Style);
 }
 
+TEST_F(FormatTest, BreakBeforeStructInitialization) {
+  FormatStyle Style = getLLVMStyle();
+  Style.ColumnLimit = 80;
+  Style.BreakBeforeBraces = FormatStyle::BS_Custom;
+  Style.BraceWrapping.BeforeStructInitialization = true;
+  Style.AlwaysBreakTemplateDeclarations = FormatStyle::BTDS_No;
+  verifyFormat("struct new_struct struct_name =\n"
+               "    {a = 1};",
+               Style);
+  verifyFormat("struct new_struct struct_name =\n"
+               "    {a = 1, b = 2};",
+               Style);
+  verifyFormat("struct new_struct struct_name =\n"
+               "    {\n"
+               "        a = 1,\n"
+               "        b = 2,\n"
+               "    };",
+               Style);
+  verifyFormat("typedef struct Foo =\n"
+               "    {\n"
+               "        a = 1,\n"
+               "        b = 2,\n"
+               "    };",
+               Style);
+  verifyFormat("static constexpr struct Foo =\n"
+               "    {\n"
+               "        a = 1,\n"
+               "        b = 2,\n"
+               "    };",
+               Style);
+  verifyFormat("template <> struct Foo =\n"
+               "    {\n"
+               "        a = 1,\n"
+               "        b = 2,\n"
+               "    };",
+               Style);
+  verifyFormat("struct =\n"
+               "    {\n"
+               "        a = 1,\n"
+               "        b = 2,\n"
+               "    };",
+               Style);
+  // BeforeStructInitialization doesn't affect on AfterStruct behavior
+  Style.BraceWrapping.AfterStruct = false;
+  verifyFormat("struct new_struct struct_name {\n"
+               "  a = 1;\n"
+               "  b = 2;\n"
+               "};",
+               Style);
+  Style.BraceWrapping.AfterStruct = true;
+  verifyFormat("struct new_struct struct_name\n"
+               "{\n"
+               "  a = 1;\n"
+               "  b = 2;\n"
+               "};",
+               Style);
+  Style.BraceWrapping.BeforeStructInitialization = false;
+  verifyFormat("struct new_struct struct_name = {a = 1};", Style);
+  verifyFormat("struct new_struct struct_name = {a = 1, b = 2};", Style);
+  verifyFormat("struct new_struct struct_name = {\n"
+               "    a = 1,\n"
+               "    b = 2,\n"
+               "};",
+               Style);
+  verifyFormat("typedef struct Foo = {\n"
+               "    a = 1,\n"
+               "    b = 2,\n"
+               "};",
+               Style);
+  verifyFormat("static constexpr struct Foo = {\n"
+               "    a = 1,\n"
+               "    b = 2,\n"
+               "};",
+               Style);
+  verifyFormat("template <> struct Foo = {\n"
+               "    a = 1,\n"
+               "    b = 2,\n"
+               "};",
+               Style);
+  verifyFormat("struct = {\n"
+               "    a = 1,\n"
+               "    b = 2,\n"
+               "};",
+               Style);
+  // BeforeStructInitialization doesn't affect on AfterStruct behavior
+  Style.BraceWrapping.AfterStruct = false;
+  verifyFormat("struct new_struct struct_name {\n"
+               "  a = 1;\n"
+               "  b = 2;\n"
+               "};",
+               Style);
+  Style.BraceWrapping.AfterStruct = true;
+  verifyFormat("struct new_struct struct_name\n"
+               "{\n"
+               "  a = 1;\n"
+               "  b = 2;\n"
+               "};",
+               Style);
+}
+
 TEST_F(FormatTest, BreakConstructorInitializersAfterColon) {
   FormatStyle Style = getLLVMStyle();
   Style.BreakConstructorInitializers = FormatStyle::BCIS_AfterColon;
@@ -16784,6 +16884,7 @@ TEST_F(FormatTest, ParsesConfigurationBools) {
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, BeforeCatch);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, BeforeElse);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, BeforeLambdaBody);
+  CHECK_PARSE_NESTED_BOOL(BraceWrapping, BeforeStructInitialization);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, BeforeWhile);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, IndentBraces);
   CHECK_PARSE_NESTED_BOOL(BraceWrapping, SplitEmptyFunction);

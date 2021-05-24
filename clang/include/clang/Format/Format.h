@@ -1645,6 +1645,22 @@ struct FormatStyle {
     ///   });
     /// \endcode
     bool BeforeLambdaBody;
+    /// Wrap before struct initialization.
+    /// \code
+    ///   true:
+    ///   struct new_struct struct_name =
+    ///       {
+    ///         a = 1,
+    ///         b = 2,
+    ///       };
+    ///
+    ///   false:
+    ///   struct new_struct struct_name = {
+    ///     a = 1,
+    ///     b = 2,
+    ///   };
+    /// \endcode
+    bool BeforeStructInitialization;
     /// Wrap before ``while``.
     /// \code
     ///   true:

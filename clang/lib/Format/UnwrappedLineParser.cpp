@@ -2720,7 +2720,11 @@ void UnwrappedLineParser::parseRecord(bool ParseAsExpr) {
       nextToken();
     }
   }
-  if (FormatTok->Tok.is(tok::l_brace)) {
+  if (InitialToken.is(tok::kw_struct) && FormatTok->Tok.is(tok::equal) &&
+      Style.BraceWrapping.BeforeStructInitialization) {
+    nextToken();
+    FormatTok->MustBreakBefore = true;
+  }  else if (FormatTok->Tok.is(tok::l_brace)) {
     if (ParseAsExpr) {
       parseChildBlock();
     } else {
